@@ -1,0 +1,151 @@
+org: missislecter
+app: links
+service: links
+frameworkVersion: "3"
+configValidationMode: warn
+
+useDotenv: true
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-west-1
+  stage: dev
+  memorySize: 128
+  timeout: 30
+  logs:
+    httpApi: true
+  environment:
+    STAGE: ${self:provider.stage}
+    TABLE_NAME: shortLinkTable
+    JWT_SECRET: mysecret
+    PASSWORD_HASH_ROUND: 10
+    LINK_ID_LENGTH: 6
+    SERVICE_EMAIL: MissisLecter@protonmail.com
+
+  httpApi:
+    authorizers:
+      customLambdaAuthorizer:
+        type: request
+        functionName: customLambdaAuthorizer
+        enableSimpleResponses: true
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - ses:SendEmail
+        - sqs:SendMessage
+        - sqs:SendMessageBatch
+        - events:*
+      Resource:
+        - "Fn::GetAtt": [shortLinkTable, Arn]
+
+functions:
+  SendEmail:
+    handler: ./src/lambdas/sendEmail.handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - SQSNotification
+              - Arn
+          batchSize: 10
+          maximumBatchingWindow: 60
+          functionResponseType: ReportBatchItemFailures
+
+  DeleteExpiredLinks:
+    handler: ./src/lambdas/deleteExpiredLinks.handler
+    events:
+      - eventBridge:
+          schedule: rate(1 days)
+
+  CreateLink:
+    handler: ./src/lambdas/createLink.handler
+    url:
+      cors: true
+    events:
+      - httpApi:
+          path: /links
+          method: PUT
+          authorizer:
+            name: customLambdaAuthorizer
+
+  DeleteLink:
+    handler: ./src/lambdas/deleteLink.handler
+    events:
+      - httpApi:
+          path: /links/{id}
+          method: DELETE
+          authorizer:
+            name: customLambdaAuthorizer
+
+  AllLinks:
+    handler: ./src/lambdas/getAll.handler
+    events:
+      - httpApi:
+          path: /links
+          method: GET
+          authorizer:
+            name: customLambdaAuthorizer
+
+  Redirect:
+    handler: ./src/lambdas/redirectLink.handler
+    events:
+      - httpApi:
+          path: /{linkId}
+          method: GET
+
+  customLambdaAuthorizer:
+    handler: ./src/lambdas/authorizer.handler
+
+  SignIn:
+    handler: ./src/lambdas/signin.handler
+    events:
+      - httpApi:
+          path: /auth/signin
+          method: POST
+
+  SignUp:
+    handler: ./src/lambdas/signup.handler
+    events:
+      - httpApi:
+          path: /auth/signup
+          method: POST
+
+resources:
+  Resources:
+    shortLinkTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: shortLinkTable
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: creator-index
+            KeySchema:
+              - AttributeName: creator
+                KeyType: HASH
+            Projection:
+              ProjectionType: "ALL"
+        StreamSpecification:
+          StreamViewType: OLD_IMAGE
+        BillingMode: PAY_PER_REQUEST
+    SQSNotification:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: "SQSNotification"
