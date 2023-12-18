@@ -1,0 +1,441 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Swagger Petstore - OpenAPI 3.0",
+    "description": "Long URLs can be inconvenient to use, especially in correspondence. To solve this\nproblem, there are services that shorten long links. This API for a link shortener application.",
+    "version": "1.0.11"
+  },
+  "servers": [
+    {
+      "url": "https://your-aws-service.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Operations about authorization"
+    },
+    {
+      "name": "links",
+      "description": "Operations about links"
+    }
+  ],
+  "paths": {
+    "/auth/signin": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login to service",
+        "description": "Login to service",
+        "operationId": "Login to service",
+        "requestBody": {
+          "description": "Login to service",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Signup to use service",
+        "description": "Signup to use service",
+        "operationId": "Signup to use service",
+        "requestBody": {
+          "description": "Signup to use service",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/{linkId}": {
+      "get": {
+        "tags": [
+          "links"
+        ],
+        "summary": "Redirect to origin url",
+        "description": "Redirect to origin url",
+        "operationId": "Redirect to origin url",
+        "parameters": [
+          {
+            "name": "linkId",
+            "in": "path",
+            "description": "short id of url to redirect",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect tot origin url"
+          },
+          "404": {
+            "description": "Link with id [${linkId}] not found"
+          }
+        }
+      }
+    },
+    "/links": {
+      "get": {
+        "tags": [
+          "links"
+        ],
+        "summary": "Get all links for user",
+        "description": "Get all links for user",
+        "operationId": "Get all links for user",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Link"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Link"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/links/{linkId}": {
+      "delete": {
+        "tags": [
+          "links"
+        ],
+        "summary": "Delete url with id linkId",
+        "description": "Delete url with id linkId",
+        "operationId": "Delete url with id linkId",
+        "parameters": [
+          {
+            "name": "linkId",
+            "in": "path",
+            "description": "short id of url to redirect",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted"
+          },
+          "400": {
+            "description": "Invalid link id"
+          },
+          "404": {
+            "description": "Link with id [${linkId}] not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/links/": {
+      "put": {
+        "tags": [
+          "links"
+        ],
+        "summary": "Create shortener links",
+        "description": "Create shortener links",
+        "operationId": "Create shortener links",
+        "requestBody": {
+          "required": true,
+          "description": "Create shortener links. Allowed ttl - \"one-time\" or \"1d\" or \"3d\" or \"7d\"",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLink"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLink"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateLink": {
+        "required": [
+          "url",
+          "ttl"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://docs.aws.amazon.com/sdk-for-javascript/"
+          },
+          "ttl": {
+            "type": "string",
+            "example": "one-time"
+          }
+        },
+        "xml": {
+          "name": "linkCreate"
+        }
+      },
+      "Link": {
+        "required": [
+          "url",
+          "ttl"
+        ],
+        "type": "object",
+        "properties": {
+          "creator": {
+            "type": "string",
+            "example": "someemail@gmail.com"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://docs.aws.amazon.com/sdk-for-javascript/"
+          },
+          "ttl": {
+            "type": "string",
+            "example": "one-time"
+          },
+          "expireIn": {
+            "type": "number",
+            "example": 14182940000
+          }
+        },
+        "xml": {
+          "name": "link"
+        }
+      },
+      "LinkResponse": {
+        "type": "object",
+        "properties": {
+          "creator": {
+            "type": "string",
+            "example": "someemail@gmail.com"
+          },
+          "shortLinkId": {
+            "type": "string",
+            "example": "ad5sda"
+          },
+          "originalSource": {
+            "type": "string",
+            "example": "https://docs.aws.amazon.com/"
+          },
+          "expired": {
+            "type": "number",
+            "example": 14182940000
+          }
+        },
+        "xml": {
+          "name": "linkResponse"
+        }
+      },
+      "User": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "someemail@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "somepassword"
+          }
+        },
+        "xml": {
+          "name": "user"
+        }
+      },
+      "Token": {
+        "required": [
+          "accessToken",
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          }
+        },
+        "xml": {
+          "name": "token"
+        }
+      }
+    },
+    "requestBodies": {
+      "UserCredentials": {
+        "description": "User to auth",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "application/xml": {
+            "schema": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      },
+      "LinkArray": {
+        "description": "List of link object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Link"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
